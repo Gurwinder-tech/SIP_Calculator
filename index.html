@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIP Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #1a56db;
+    --primary-light: #e8f0fe;
+    --accent: #00c896;
+    --accent-light: #e6faf5;
+    --orange: #f97316;
+    --orange-light: #fff3e8;
+    --bg: #eef3ff;
+    --card: #ffffff;
+    --text: #1e2a3a;
+    --muted: #6b7c93;
+    --border: #dde3f0;
+    --radius: 18px;
+    --shadow: 0 4px 24px rgba(26,86,219,0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    color: var(--text);
+    padding: 28px 16px 48px;
+  }
+
+  .wrapper {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-family: 'Sora', sans-serif;
+    font-size: clamp(1.5rem, 4vw, 2.3rem);
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 0.92rem;
+    margin-bottom: 22px;
+    max-width: 500px;
+    line-height: 1.6;
+  }
+
+  /* ── Tabs ── */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--card);
+    border-radius: 50px;
+    padding: 5px;
+    width: fit-content;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+
+  .tab-btn {
+    padding: 9px 28px;
+    border: none;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+    background: transparent;
+    color: var(--muted);
+  }
+
+  .tab-btn.active {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 2px 12px rgba(26,86,219,0.35);
+  }
+
+  /* ── DESKTOP: side-by-side ── */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .card-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    overflow: hidden;
+    border-radius: var(--radius) var(--radius) 0 0;
+  }
+
+  .left-panel {
+    padding: 32px;
+    border-right: 1px solid var(--border);
+  }
+
+  .right-panel {
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f8faff 0%, #eef3ff 100%);
+    gap: 24px;
+    overflow: visible;
+  }
+
+  /* ── Input Groups ── */
+  .input-group { margin-bottom: 26px; }
+  .input-group:last-child { margin-bottom: 0; }
+
+  .input-label {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  /* Amount input */
+  .rupee-input-wrap {
+    display: flex;
+    align-items: center;
+    background: var(--primary-light);
+    border: 1.5px solid var(--primary);
+    border-radius: 10px;
+    padding: 10px 16px;
+    gap: 6px;
+    width: 100%;
+    transition: box-shadow 0.2s;
+  }
+
+  .rupee-input-wrap:focus-within {
+    box-shadow: 0 0 0 3px rgba(26,86,219,0.15);
+  }
+
+  .rupee-sym {
+    color: var(--primary);
+    font-size: 1rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .rupee-input-wrap input[type="number"] {
+    border: none;
+    background: transparent;
+    font-family: 'Sora', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--primary);
+    width: 100%;
+    outline: none;
+    -moz-appearance: textfield;
+  }
+
+  .rupee-input-wrap input[type="number"]::-webkit-outer-spin-button,
+  .rupee-input-wrap input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+  /* Badges */
+  .pct-badge {
+    background: var(--accent-light);
+    border: 1.5px solid var(--accent);
+    border-radius: 10px;
+    padding: 8px 18px;
+    font-family: 'Sora', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 72px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .yr-badge {
+    background: var(--orange-light);
+    border: 1.5px solid var(--orange);
+    border-radius: 10px;
+    padding: 8px 18px;
+    font-family: 'Sora', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--orange);
+    min-width: 72px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  /* Sliders */
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 5px;
+    border-radius: 10px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #fff;
+    border: 3px solid var(--primary);
+    box-shadow: 0 2px 8px rgba(26,86,219,0.3);
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+
+  input[type="range"]::-webkit-slider-thumb:hover,
+  input[type="range"]:active::-webkit-slider-thumb { transform: scale(1.2); }
+
+  input[type="range"]::-moz-range-thumb {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #fff; border: 3px solid var(--primary);
+    box-shadow: 0 2px 8px rgba(26,86,219,0.3); cursor: pointer;
+    border: none;
+  }
+
+  .slider-limits {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.74rem;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  /* ── Donut ── */
+  .donut-wrap {
+    position: relative;
+    width: 200px; height: 200px;
+    flex-shrink: 0;
+  }
+
+  .donut-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    pointer-events: none;
+    width: 100%;
+  }
+
+  .donut-center .total-label {
+    font-size: 0.7rem;
+    color: var(--muted);
+    font-weight: 500;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .donut-center .total-value {
+    font-family: 'Sora', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex; flex-direction: column; gap: 12px;
+    width: 100%; max-width: 240px;
+  }
+
+  .legend-item {
+    display: flex; align-items: center;
+    justify-content: space-between; gap: 10px;
+  }
+
+  .legend-left { display: flex; align-items: center; gap: 8px; }
+
+  .legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+
+  .legend-name { font-size: 0.82rem; color: var(--muted); font-weight: 500; }
+
+  .legend-val {
+    font-family: 'Sora', sans-serif;
+    font-size: 0.92rem; font-weight: 700; color: var(--text);
+  }
+
+  /* ── Result Bar ── */
+  .result-bar {
+    border-top: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex; align-items: center;
+    justify-content: space-between;
+    gap: 14px; flex-wrap: wrap;
+    background: #fff;
+  }
+
+  .result-stats { display: flex; gap: 28px; flex-wrap: wrap; }
+
+  .stat-label { font-size: 0.78rem; color: var(--muted); font-weight: 500; margin-bottom: 3px; }
+
+  .stat-value {
+    font-family: 'Sora', sans-serif;
+    font-size: 1rem; font-weight: 700; color: var(--text);
+  }
+
+  .stat-value.highlight { color: var(--primary); }
+
+  .invest-btn {
+    background: var(--accent);
+    color: #fff; border: none; border-radius: 10px;
+    padding: 13px 28px;
+    font-family: 'Sora', sans-serif;
+    font-size: 0.85rem; font-weight: 700; letter-spacing: 0.8px;
+    cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 4px 14px rgba(0,200,150,0.3);
+    white-space: nowrap;
+  }
+
+  .invest-btn:hover {
+    background: #00b085;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(0,200,150,0.4);
+  }
+
+  #lumpsum-panel { display: none; }
+
+  /* ════════════════════════════════
+     MOBILE  ≤ 700px
+  ════════════════════════════════ */
+  @media (max-width: 700px) {
+    body { padding: 20px 14px 56px; }
+
+    h1 { font-size: 1.45rem; }
+    .subtitle { font-size: 0.88rem; margin-bottom: 18px; }
+
+    /* Tabs full width */
+    .tabs { width: 100%; justify-content: center; }
+    .tab-btn { flex: 1; text-align: center; padding: 10px 12px; }
+
+    /* Stack panels */
+    .card-inner { grid-template-columns: 1fr; }
+
+    .left-panel {
+      padding: 20px 18px;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .right-panel {
+      padding: 24px 18px;
+      /* On mobile show chart ABOVE result bar, nice compact layout */
+    }
+
+    /* Donut smaller on mobile */
+    .donut-wrap { width: 160px; height: 160px; margin: 0 auto; }
+
+    .donut-wrap canvas { width: 160px !important; height: 160px !important; }
+
+    .donut-center .total-value { font-size: 0.92rem; }
+
+    /* Result bar stacks nicely */
+    .result-bar {
+      padding: 16px 18px;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 14px;
+    }
+
+    .result-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 10px;
+    }
+
+    /* Total value spans full width */
+    .result-stats .stat-total {
+      grid-column: 1 / -1;
+    }
+
+    .invest-btn {
+      width: 100%;
+      padding: 14px;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    /* Sliders — bigger touch target */
+    input[type="range"] { height: 6px; }
+    input[type="range"]::-webkit-slider-thumb { width: 24px; height: 24px; }
+
+    /* Badges inline with label on same row */
+    .badge-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+  }
+
+  @media (max-width: 380px) {
+    .left-panel, .right-panel { padding: 16px 14px; }
+    .result-bar { padding: 14px 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <h1>SIP Calculator</h1>
+  <p class="subtitle">Estimate the potential growth of your Systematic Investment Plan over your chosen time frame.</p>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('sip',this)">SIP</button>
+    <button class="tab-btn" onclick="switchTab('lumpsum',this)">Lumpsum</button>
+  </div>
+
+  <!-- ══ SIP Panel ══ -->
+  <div id="sip-panel">
+    <div class="card">
+      <div class="card-inner">
+
+        <!-- Left / Inputs -->
+        <div class="left-panel">
+
+          <!-- Monthly Investment -->
+          <div class="input-group">
+            <span class="input-label">Monthly Investment</span>
+            <div class="rupee-input-wrap" style="margin-bottom:12px">
+              <span class="rupee-sym">₹</span>
+              <input type="number" id="sip-amount" value="25000" min="500" max="1000000" step="500"
+                oninput="syncSlider('sip-amt-sl','sip-amount');updateSIP()">
+            </div>
+            <input type="range" id="sip-amt-sl" min="500" max="100000" step="500" value="25000"
+              oninput="document.getElementById('sip-amount').value=this.value;updateSIP()">
+            <div class="slider-limits"><span>₹500</span><span>₹1,00,000</span></div>
+          </div>
+
+          <!-- Return Rate -->
+          <div class="input-group">
+            <div class="badge-row">
+              <span class="input-label" style="margin:0">Expected Return Rate (p.a.)</span>
+              <div class="pct-badge" id="sip-rate-badge">12%</div>
+            </div>
+            <input type="range" id="sip-rate" min="1" max="30" step="0.5" value="12"
+              oninput="document.getElementById('sip-rate-badge').textContent=this.value+'%';updateSIP()">
+            <div class="slider-limits"><span>1%</span><span>30%</span></div>
+          </div>
+
+          <!-- Time Period -->
+          <div class="input-group">
+            <div class="badge-row">
+              <span class="input-label" style="margin:0">Time Period</span>
+              <div class="yr-badge" id="sip-yr-badge">10 Yr</div>
+            </div>
+            <input type="range" id="sip-years" min="1" max="40" step="1" value="10"
+              oninput="document.getElementById('sip-yr-badge').textContent=this.value+' Yr';updateSIP()">
+            <div class="slider-limits"><span>1 Yr</span><span>40 Yr</span></div>
+          </div>
+
+        </div>
+
+        <!-- Right / Chart -->
+        <div class="right-panel">
+          <div class="donut-wrap">
+            <canvas id="donut1" width="400" height="400" style="width:200px;height:200px"></canvas>
+            <div class="donut-center">
+              <span class="total-label">Total Value</span>
+              <span class="total-value" id="sip-ctr">₹56.01 L</span>
+            </div>
+          </div>
+          <div class="legend">
+            <div class="legend-item">
+              <div class="legend-left">
+                <div class="legend-dot" style="background:#dde8ff;border:2px solid var(--primary)"></div>
+                <span class="legend-name">Invested Amount</span>
+              </div>
+              <span class="legend-val" id="sip-inv-lg">₹30,00,000</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-left">
+                <div class="legend-dot" style="background:var(--primary)"></div>
+                <span class="legend-name">Est. Returns</span>
+              </div>
+              <span class="legend-val" id="sip-ret-lg">₹26,00,897</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Result Bar -->
+      <div class="result-bar">
+        <div class="result-stats">
+          <div>
+            <div class="stat-label">Invested Amount</div>
+            <div class="stat-value" id="sip-inv">₹30,00,000</div>
+          </div>
+          <div>
+            <div class="stat-label">Est. Returns</div>
+            <div class="stat-value highlight" id="sip-ret">₹26,00,897</div>
+          </div>
+          <div class="stat-total">
+            <div class="stat-label">Total Value</div>
+            <div class="stat-value" id="sip-tot">₹56,00,897</div>
+          </div>
+        </div>
+        <button class="invest-btn">INVEST NOW</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Lumpsum Panel ══ -->
+  <div id="lumpsum-panel">
+    <div class="card">
+      <div class="card-inner">
+
+        <div class="left-panel">
+
+          <div class="input-group">
+            <span class="input-label">Total Investment</span>
+            <div class="rupee-input-wrap" style="margin-bottom:12px">
+              <span class="rupee-sym">₹</span>
+              <input type="number" id="ls-amount" value="500000" min="1000" max="10000000" step="1000"
+                oninput="syncSlider('ls-amt-sl','ls-amount');updateLS()">
+            </div>
+            <input type="range" id="ls-amt-sl" min="1000" max="5000000" step="1000" value="500000"
+              oninput="document.getElementById('ls-amount').value=this.value;updateLS()">
+            <div class="slider-limits"><span>₹1,000</span><span>₹50,00,000</span></div>
+          </div>
+
+          <div class="input-group">
+            <div class="badge-row">
+              <span class="input-label" style="margin:0">Expected Return Rate (p.a.)</span>
+              <div class="pct-badge" id="ls-rate-badge">12%</div>
+            </div>
+            <input type="range" id="ls-rate" min="1" max="30" step="0.5" value="12"
+              oninput="document.getElementById('ls-rate-badge').textContent=this.value+'%';updateLS()">
+            <div class="slider-limits"><span>1%</span><span>30%</span></div>
+          </div>
+
+          <div class="input-group">
+            <div class="badge-row">
+              <span class="input-label" style="margin:0">Time Period</span>
+              <div class="yr-badge" id="ls-yr-badge">10 Yr</div>
+            </div>
+            <input type="range" id="ls-years" min="1" max="40" step="1" value="10"
+              oninput="document.getElementById('ls-yr-badge').textContent=this.value+' Yr';updateLS()">
+            <div class="slider-limits"><span>1 Yr</span><span>40 Yr</span></div>
+          </div>
+
+        </div>
+
+        <div class="right-panel">
+          <div class="donut-wrap">
+            <canvas id="donut2" width="400" height="400" style="width:200px;height:200px"></canvas>
+            <div class="donut-center">
+              <span class="total-label">Total Value</span>
+              <span class="total-value" id="ls-ctr">₹15.53 L</span>
+            </div>
+          </div>
+          <div class="legend">
+            <div class="legend-item">
+              <div class="legend-left">
+                <div class="legend-dot" style="background:#ffe5cc;border:2px solid var(--orange)"></div>
+                <span class="legend-name">Invested Amount</span>
+              </div>
+              <span class="legend-val" id="ls-inv-lg">₹5,00,000</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-left">
+                <div class="legend-dot" style="background:var(--primary)"></div>
+                <span class="legend-name">Est. Returns</span>
+              </div>
+              <span class="legend-val" id="ls-ret-lg">₹10,52,924</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="result-bar">
+        <div class="result-stats">
+          <div>
+            <div class="stat-label">Invested Amount</div>
+            <div class="stat-value" id="ls-inv">₹5,00,000</div>
+          </div>
+          <div>
+            <div class="stat-label">Est. Returns</div>
+            <div class="stat-value highlight" id="ls-ret">₹10,52,924</div>
+          </div>
+          <div class="stat-total">
+            <div class="stat-label">Total Value</div>
+            <div class="stat-value" id="ls-tot">₹15,52,924</div>
+          </div>
+        </div>
+        <button class="invest-btn">INVEST NOW</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /wrapper -->
+
+<script>
+// ── Helpers ──────────────────────────────────────
+function fmt(n){
+  if(n>=10000000) return '₹'+(n/10000000).toFixed(2)+' Cr';
+  if(n>=100000)   return '₹'+(n/100000).toFixed(2)+' L';
+  return '₹'+Math.round(n).toLocaleString('en-IN');
+}
+function fmtF(n){ return '₹'+Math.round(n).toLocaleString('en-IN'); }
+
+function setSliderBg(el, color){
+  const pct = ((+el.value - +el.min) / (+el.max - +el.min)) * 100;
+  el.style.background = `linear-gradient(to right,${color} ${pct}%,#dde3f0 ${pct}%)`;
+}
+
+function syncSlider(sliderId, inputId){
+  const sl = document.getElementById(sliderId);
+  sl.value = Math.min(+document.getElementById(inputId).value, +sl.max);
+  setSliderBg(sl, '#1a56db');
+}
+
+// ── Donut ────────────────────────────────────────
+function drawDonut(id, invested, returns, colors){
+  const c = document.getElementById(id); if(!c) return;
+  // Read the CSS display size reliably
+  const styleW = parseInt(c.style.width) || c.offsetWidth || 200;
+  const displaySz = styleW;
+  c.width  = displaySz * 2;
+  c.height = displaySz * 2;
+  c.style.width  = displaySz + 'px';
+  c.style.height = displaySz + 'px';
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0, 0, c.width, c.height);
+  ctx.scale(2, 2);
+  const cx = displaySz/2, cy = displaySz/2;
+  const R = displaySz * 0.43, r = displaySz * 0.27;
+  const tot = invested + returns || 1;
+  const a1  = (invested / tot) * 2 * Math.PI;
+  const a2  = (returns  / tot) * 2 * Math.PI;
+  const s   = -Math.PI / 2;
+
+  // Invested slice
+  ctx.beginPath(); ctx.moveTo(cx, cy);
+  ctx.arc(cx, cy, R, s, s + a1); ctx.closePath();
+  ctx.fillStyle = colors[0]; ctx.fill();
+
+  // Returns slice
+  ctx.beginPath(); ctx.moveTo(cx, cy);
+  ctx.arc(cx, cy, R, s + a1, s + a1 + a2); ctx.closePath();
+  ctx.fillStyle = colors[1]; ctx.fill();
+
+  // Hole
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, 2*Math.PI);
+  ctx.fillStyle = '#fff'; ctx.fill();
+  ctx.strokeStyle = 'rgba(0,0,0,0.04)';
+  ctx.lineWidth = 2; ctx.stroke();
+}
+
+// ── SIP ──────────────────────────────────────────
+function updateSIP(){
+  const P = +document.getElementById('sip-amount').value || 0;
+  const r = (+document.getElementById('sip-rate').value  || 0) / 100 / 12;
+  const n = (+document.getElementById('sip-years').value || 0) * 12;
+  const inv = P * n;
+  const tot = r > 0 ? P * (Math.pow(1+r,n)-1)/r*(1+r) : inv;
+  const ret = tot - inv;
+
+  document.getElementById('sip-inv').textContent    = fmtF(inv);
+  document.getElementById('sip-ret').textContent    = fmtF(ret);
+  document.getElementById('sip-tot').textContent    = fmtF(tot);
+  document.getElementById('sip-inv-lg').textContent = fmtF(inv);
+  document.getElementById('sip-ret-lg').textContent = fmtF(ret);
+  document.getElementById('sip-ctr').textContent    = fmt(tot);
+
+  setSliderBg(document.getElementById('sip-amt-sl'), '#1a56db');
+  setSliderBg(document.getElementById('sip-rate'),   '#00c896');
+  setSliderBg(document.getElementById('sip-years'),  '#f97316');
+
+  drawDonut('donut1', inv, ret, ['#dde8ff', '#1a56db']);
+}
+
+// ── Lumpsum ──────────────────────────────────────
+function updateLS(){
+  const P = +document.getElementById('ls-amount').value || 0;
+  const r = (+document.getElementById('ls-rate').value  || 0) / 100;
+  const n = +document.getElementById('ls-years').value  || 0;
+  const tot = P * Math.pow(1+r, n);
+  const ret = tot - P;
+
+  document.getElementById('ls-inv').textContent    = fmtF(P);
+  document.getElementById('ls-ret').textContent    = fmtF(ret);
+  document.getElementById('ls-tot').textContent    = fmtF(tot);
+  document.getElementById('ls-inv-lg').textContent = fmtF(P);
+  document.getElementById('ls-ret-lg').textContent = fmtF(ret);
+  document.getElementById('ls-ctr').textContent    = fmt(tot);
+
+  setSliderBg(document.getElementById('ls-amt-sl'), '#1a56db');
+  setSliderBg(document.getElementById('ls-rate'),   '#00c896');
+  setSliderBg(document.getElementById('ls-years'),  '#f97316');
+
+  drawDonut('donut2', P, ret, ['#ffe5cc', '#1a56db']);
+}
+
+// ── Tab switch ───────────────────────────────────
+function switchTab(tab, btn){
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('sip-panel').style.display     = tab==='sip'     ? 'block' : 'none';
+  document.getElementById('lumpsum-panel').style.display = tab==='lumpsum' ? 'block' : 'none';
+  if(tab === 'lumpsum') setTimeout(updateLS, 50);
+}
+
+// ── Init ─────────────────────────────────────────
+window.addEventListener('load', () => { updateSIP(); updateLS(); });
+window.addEventListener('resize', () => { updateSIP(); updateLS(); });
+</script>
+</body>
+</html>
